@@ -1,23 +1,15 @@
 <template>
   <div class="w-full">
-    <svg viewBox="0 0 100 10" class="">
-      <rect x="0" y="0" width="100" height="10" fill="#e5e7eb" />
-      <rect
-        :x="0"
-        :y="0"
-        :width="(used / clampedTotal) * 100"
-        height="10"
-        fill="#4ade80"
-      />
-      <text
-        x="50"
-        y="7"
-        text-anchor="middle"
-        class="fill-gray-800 text-[5px] font-semibold"
-      >
-        {{ used }} / {{ clampedTotal }} {{ unit }}
-      </text>
-    </svg>
+    <div class="bg-gray-200 h-4 rounded-full">
+      <div
+        class="bg-green-500 h-full rounded-full"
+        :style="{ width: `${(used / clampedTotal) * 100}%`, transition: 'width 0.5s' }"
+      ></div>
+    </div>
+    <div class="flex justify-between text-sm mt-1">
+      <span>{{ used }} {{ unit }}</span>
+      <span>{{ clampedTotal }} {{ unit }}</span>
+    </div>
   </div>
 </template>
 

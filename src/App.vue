@@ -12,7 +12,7 @@
       </StatCard>
 
       <StatCard title="CPU Temp">
-        <ThermoGauge :value="cpuTemp" :max="85" unit="°C" />
+        <ThermoGauge :value="cpuTemp" :max="90" unit="°C" />
       </StatCard>
 
       <StatCard title="CPU Usage">

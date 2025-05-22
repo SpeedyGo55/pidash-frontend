@@ -1,30 +1,24 @@
 <template>
-  <div class="relative w-12 h-40 border rounded-full bg-gray-200">
+  <div class="relative w-12 h-40 border rounded-full bg-gray">
     <!-- Thermo Gauge -->
-    <svg viewBox="0 0 100 200" class="absolute top-0 left-0">
-      <rect x="20" y="0" width="60" height="200" fill="#e5e7eb" />
-      <rect
-        :x="20"
-        :y="200 - height"
-        width="60"
-        :height="height"
-        fill="#4ade80"
-      />
-      <text
-        x="50"
-        y="210"
-        text-anchor="middle"
-        class="fill-gray-800 text-[5px] font-semibold"
-      >
-        {{ clampedValue }} {{ unit }}
-      </text>
-    </svg>
+    <div
+      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 bg-green-500 rounded-full"
+      :style="{ height: height + '%', width: '100%', transition: 'height 0.5s' }"
+    ></div>
+    <!-- Label -->
+    <div
+      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center text-gray-800 font-semibold"
+      :style="{ bottom: text_height + '%', transition: 'bottom 0.5s' }"
+    >
+      {{ clampedValue }} {{ unit }}
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
 const props = defineProps({ value: Number, max: Number, unit: String })
-const clampedValue = computed(() => Math.min(props.value, props.max))
+const clampedValue = computed(() => Math.min(props.value / 1000, props.max))
 const height = computed(() => (clampedValue.value / props.max) * 100) // 0 to 100
+const text_height = computed(() => Math.min(height.value, 70)) // 0 to 100
 </script>
