@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-4">
-    <h1 class="text-3xl font-bold mb-6 text-center">Raspberry Pi Stats Dashboard</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center">PiDash</h1>
 
     <!-- Direct grid, no nested divs -->
     <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
