@@ -12,6 +12,7 @@ export default defineConfig({
         '/cpu_usage': 'http://speedygo55.duckdns.org:8080',
         '/mem_usage': 'http://speedygo55.duckdns.org:8080',
         '/disk_usage': 'http://speedygo55.duckdns.org:8080',
+        '/history': 'http://speedygo55.duckdns.org:8080',
       },
     },
   }

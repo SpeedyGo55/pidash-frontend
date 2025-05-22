@@ -1,11 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gray-100 p-4">
+  <div class="min-h-screen bg-gray-100 p-4 dark:bg-gray-900">
     <h1 class="text-3xl font-bold mb-6 text-center">PiDash</h1>
 
     <!-- Direct grid, no nested divs -->
     <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
 
-      <StatCard title="Uptime">
+      <StatCard title="Uptime" >
         <div class="text-xl font-semibold text-center">
           {{ uptimeText }}
         </div>
@@ -31,6 +31,13 @@
         <UsageBar :used="diskUsed" :total="diskTotal" unit="GB" />
       </StatCard>
 
+
+
+    </div>
+    <div class="container mx-auto mt-6">
+      <StatCard title="CPU History">
+        <HistoryChart :history="historyData" />
+      </StatCard>
     </div>
   </div>
 </template>
@@ -44,6 +51,7 @@ import StatCard from './components/StatCard.vue'
 import ThermoGauge from './components/ThermoGauge.vue'
 import DialGauge from './components/DialGauge.vue'
 import UsageBar from './components/UsageBar.vue'
+import HistoryChart from "./components/HistoryChart.vue";
 
 const cpuTemp = ref(0)
 const fanRpm = ref(0)
@@ -53,6 +61,7 @@ const memTotal = ref(1)
 const diskUsed = ref(0)
 const diskTotal = ref(1)
 const cpuUsage = ref(0)
+const historyData = ref([])
 
 const uptimeText = computed(() => {
   const totalSeconds = uptime.value / 1000
@@ -62,6 +71,16 @@ const uptimeText = computed(() => {
   return `${d}d ${h}h ${m}m`
 })
 
+
+async function fetchHistory() {
+  try {
+    const response = await axios.get('/history')
+    historyData.value = response.data.data
+  } catch (e) {
+    console.error("Failed to fetch history:", e)
+  }
+}
+
 async function fetchStats() {
   try {
     cpuTemp.value = (await axios.get('/cpu_temp')).data.cpu_temp
@@ -69,13 +88,13 @@ async function fetchStats() {
     uptime.value = (await axios.get('/uptime')).data.uptime
 
     const memStats = (await axios.get('/mem_usage')).data
-    memUsed.value = (parseInt(memStats.mem_used) / 1024 / 1024).toFixed(2)
-    memTotal.value = (parseInt(memStats.mem_total) / 1024 / 1024).toFixed(2)
+    memUsed.value = parseInt(memStats.mem_used) / 1024 / 1024
+    memTotal.value = parseInt(memStats.mem_total) / 1024 / 1024
 
     const diskStats = (await axios.get('/disk_usage')).data
     diskUsed.value = (parseInt(diskStats.used) / 1024 / 1024).toFixed(2)
     diskTotal.value = (parseInt(diskStats.total) / 1024 / 1024).toFixed(2)
-    cpuUsage.value = ((await axios.get('/cpu_usage')).data.cpu_usage * 100).toFixed(2)
+    cpuUsage.value = ((await axios.get('/cpu_usage')).data.cpu_usage).toFixed(2)
   } catch (e) {
     console.error("Failed to fetch stats:", e)
   }
@@ -83,7 +102,11 @@ async function fetchStats() {
 
 onMounted(() => {
   fetchStats()
-  setInterval(fetchStats, 5000)
+  fetchHistory()
+  setInterval(() => {
+    fetchStats()
+    fetchHistory()
+  }, 5000)
 })
 </script>
 

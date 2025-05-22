@@ -14,7 +14,7 @@
       />
 
       <!-- Label -->
-      <text x="100" y="90" text-anchor="middle" class="fill-gray-800 text-xl font-semibold">
+      <text x="100" y="90" text-anchor="middle" class="fill-gray-800 dark:fill-white font-semibold text-xl">
         {{ Math.round(animatedValue) }} {{ unit }}
       </text>
     </svg>

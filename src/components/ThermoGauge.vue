@@ -7,7 +7,7 @@
     ></div>
     <!-- Label -->
     <div
-      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center text-gray-800 font-semibold"
+      class="absolute bottom-0 left-1/2 transform -translate-x-1/2 text-center text-gray-800 font-semibold  dark:text-white"
       :style="{ bottom: text_height + '%', transition: 'bottom 0.5s' }"
     >
       {{ clampedValue }} {{ unit }}
