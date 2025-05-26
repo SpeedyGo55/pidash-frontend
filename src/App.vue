@@ -1,8 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-100 p-4 dark:bg-gray-900">
-    <h1 class="text-3xl font-bold mb-6 text-center">PiDash</h1>
+    <h1 class="text-3xl font-bold mb-6 text-center dark:text-white">PiDash</h1>
 
-    <!-- Direct grid, no nested divs -->
     <div class="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
 
       <StatCard title="Uptime" >
@@ -52,6 +51,7 @@ import ThermoGauge from './components/ThermoGauge.vue'
 import DialGauge from './components/DialGauge.vue'
 import UsageBar from './components/UsageBar.vue'
 import HistoryChart from "./components/HistoryChart.vue";
+import { useDark } from '@vueuse/core'
 
 const cpuTemp = ref(0)
 const fanRpm = ref(0)
@@ -62,6 +62,7 @@ const diskUsed = ref(0)
 const diskTotal = ref(1)
 const cpuUsage = ref(0)
 const historyData = ref([])
+const isDark = useDark().value
 
 const uptimeText = computed(() => {
   const totalSeconds = uptime.value / 1000
@@ -76,6 +77,16 @@ async function fetchHistory() {
   try {
     const response = await axios.get('/history')
     historyData.value = response.data.data
+    // sort history by timestamp
+    historyData.value.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+    // limit to last 24 hours
+    const now = new Date()
+    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    historyData.value = historyData.value.filter(item => new Date(item.timestamp) >= twentyFourHoursAgo)
+    // convert timestamps to Date objects
+    historyData.value.forEach(item => {
+      item.timestamp = new Date(item.timestamp)
+    })
   } catch (e) {
     console.error("Failed to fetch history:", e)
   }
@@ -106,7 +117,7 @@ onMounted(() => {
   setInterval(() => {
     fetchStats()
     fetchHistory()
-  }, 5000)
+  }, 1000)
 })
 </script>
 
