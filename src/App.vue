@@ -40,53 +40,49 @@
     </div>
   </div>
 </template>
-
-
-
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import StatCard from './components/StatCard.vue'
 import ThermoGauge from './components/ThermoGauge.vue'
 import DialGauge from './components/DialGauge.vue'
 import UsageBar from './components/UsageBar.vue'
-import HistoryChart from "./components/HistoryChart.vue";
-import { useDark } from '@vueuse/core'
+import HistoryChart from "./components/HistoryChart.vue"
 
-const cpuTemp = ref(0)
-const fanRpm = ref(0)
-const uptime = ref(0)
-const memUsed = ref(0)
-const memTotal = ref(1)
-const diskUsed = ref(0)
-const diskTotal = ref(1)
-const cpuUsage = ref(0)
-const historyData = ref([])
-const isDark = useDark().value
+interface HistoryEntry {
+  timestamp: string
+  cpu_usage: number
+  disk_used: number
+  disk_total: number
+  mem_used: number
+  mem_total: number
+}
+
+const cpuTemp = ref<number>(0)
+const fanRpm = ref<number>(0)
+const uptime = ref<number>(0)
+const memUsed = ref<number>(0)
+const memTotal = ref<number>(1)
+const diskUsed = ref<number>(0)
+const diskTotal = ref<number>(1)
+const cpuUsage = ref<number>(0)
+const historyData = ref<HistoryEntry[]>([])
 
 const uptimeText = computed(() => {
   const totalSeconds = uptime.value / 1000
-  const d = Math.floor(totalSeconds / (3600 * 24))
-  const h = Math.floor((totalSeconds % (3600 * 24)) / 3600)
-  const m = Math.floor((totalSeconds % (3600 * 24) % 3600) / 60)
+  const d = Math.floor(totalSeconds / 86400)
+  const h = Math.floor((totalSeconds % 86400) / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
   return `${d}d ${h}h ${m}m`
 })
 
-
 async function fetchHistory() {
   try {
-    const response = await axios.get('/history')
-    historyData.value = response.data.data
-    // sort history by timestamp
-    historyData.value.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
-    // limit to last 24 hours
-    const now = new Date()
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-    historyData.value = historyData.value.filter(item => new Date(item.timestamp) >= twentyFourHoursAgo)
-    // convert timestamps to Date objects
-    historyData.value.forEach(item => {
-      item.timestamp = new Date(item.timestamp)
-    })
+    const response = (await axios.get<{ data: HistoryEntry[] }>('/history')).data.data
+    historyData.value = response
+    historyData.value.sort((a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
   } catch (e) {
     console.error("Failed to fetch history:", e)
   }
@@ -94,18 +90,19 @@ async function fetchHistory() {
 
 async function fetchStats() {
   try {
-    cpuTemp.value = (await axios.get('/cpu_temp')).data.cpu_temp
-    fanRpm.value = (await axios.get('/fan_speed')).data.fan_speed
-    uptime.value = (await axios.get('/uptime')).data.uptime
+    cpuTemp.value = (await axios.get<{ cpu_temp: number }>('/cpu_temp')).data.cpu_temp
+    fanRpm.value = (await axios.get<{ fan_speed: number }>('/fan_speed')).data.fan_speed
+    uptime.value = (await axios.get<{ uptime: number }>('/uptime')).data.uptime
 
-    const memStats = (await axios.get('/mem_usage')).data
-    memUsed.value = parseInt(memStats.mem_used) / 1024 / 1024
-    memTotal.value = parseInt(memStats.mem_total) / 1024 / 1024
+    const memStats = (await axios.get<{ mem_used: number; mem_total: number }>('/mem_usage')).data
+    memUsed.value = memStats.mem_used / 1024 / 1024
+    memTotal.value = memStats.mem_total / 1024 / 1024
 
-    const diskStats = (await axios.get('/disk_usage')).data
-    diskUsed.value = (parseInt(diskStats.used) / 1024 / 1024).toFixed(2)
-    diskTotal.value = (parseInt(diskStats.total) / 1024 / 1024).toFixed(2)
-    cpuUsage.value = ((await axios.get('/cpu_usage')).data.cpu_usage).toFixed(2)
+    const diskStats = (await axios.get<{ used: number; total: number }>('/disk_usage')).data
+    diskUsed.value = parseFloat((diskStats.used / 1024 / 1024).toFixed(2))
+    diskTotal.value = parseFloat((diskStats.total / 1024 / 1024).toFixed(2))
+
+    cpuUsage.value = parseFloat(((await axios.get<{ cpu_usage: number }>('/cpu_usage')).data.cpu_usage).toFixed(2))
   } catch (e) {
     console.error("Failed to fetch stats:", e)
   }
@@ -120,4 +117,3 @@ onMounted(() => {
   }, 1000)
 })
 </script>
-

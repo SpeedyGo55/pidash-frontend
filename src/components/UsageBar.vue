@@ -12,12 +12,14 @@
     </div>
   </div>
 </template>
-
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
-const props = defineProps({ used: Number, total: Number, unit: String })
-const clampedUsed = computed(() => Math.min(props.used, props.total))
-const clampedTotal = computed(() => Math.max(props.used, props.total))
-const used = computed(() => clampedUsed.value)
+const props = defineProps<{
+  used: number
+  total: number
+  unit: string
+}>()
 
+const clampedTotal = computed(() => Math.max(props.used, props.total))
 </script>
+

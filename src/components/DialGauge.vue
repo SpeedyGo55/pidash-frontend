@@ -20,52 +20,53 @@
     </svg>
   </div>
 </template>
-
-<script setup>
+<script setup lang="ts">
 import { computed, watch, ref, onMounted } from 'vue'
 
-const props = defineProps({
-  value: Number,
-  max: Number,
-  unit: String
-})
+const props = defineProps<{
+  value: number
+  max: number
+  unit: string
+}>()
 
 const clampedValue = computed(() => Math.min(props.value, props.max))
 const clampedMax = computed(() => Math.max(props.value, props.max))
-const animatedValue = ref(clampedValue.value)
+const animatedValue = ref<number>(0)
 
-const animateValue = (start, end) => {
-  const duration = 1000 // Animation duration in milliseconds
+function animateValue(start: number, end: number) {
+  const duration = 1000
   const startTime = performance.now()
 
-  const animate = (currentTime) => {
+  function animate(currentTime: number) {
     const elapsed = currentTime - startTime
     const progress = Math.min(elapsed / duration, 1)
     animatedValue.value = start + (end - start) * progress
-
-    if (progress < 1) {
-      requestAnimationFrame(animate)
-    }
+    if (progress < 1) requestAnimationFrame(animate)
   }
 
   requestAnimationFrame(animate)
 }
+
 onMounted(() => {
   animatedValue.value = clampedValue.value
   animateValue(0, clampedValue.value)
 })
-watch(() => props.value, (newValue) => {
-  const newClampedValue = Math.min(newValue, clampedMax.value)
-  animateValue(animatedValue.value, newClampedValue)
-})
-watch(() => props.max, (newMax) => {
-  const newClampedValue = Math.min(clampedValue.value, newMax)
-  animateValue(animatedValue.value, newClampedValue)
-})
 
+watch(
+    () => props.value,
+    (newVal) => {
+      animateValue(animatedValue.value, Math.min(newVal, clampedMax.value))
+    }
+)
+
+watch(
+    () => props.max,
+    () => {
+      animateValue(animatedValue.value, clampedValue.value)
+    }
+)
 
 const angle = computed(() => (animatedValue.value / props.max) * Math.PI)
-
 const radius = 80
 const center = 100
 
@@ -76,4 +77,3 @@ const arcPath = computed(() => {
   return `M20,100 A80,80 0 ${endAngle > Math.PI ? 1 : 0},1 ${x},${y}`
 })
 </script>
-
