@@ -46,6 +46,9 @@ import ThermoGauge from './components/ThermoGauge.vue'
 import DialGauge from './components/DialGauge.vue'
 import UsageBar from './components/UsageBar.vue'
 import HistoryChart from "./components/HistoryChart.vue"
+const apiUrl = 'http://speedygo55.duckdns.org:8080'
+
+axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
 
 interface HistoryEntry {
   timestamp: string
@@ -76,7 +79,7 @@ const uptimeText = computed(() => {
 
 async function fetchHistory() {
   try {
-    const response = (await axios.get<{ data: HistoryEntry[] }>('/history')).data.data
+    const response = (await axios.get<{ data: HistoryEntry[] }>(apiUrl + '/history')).data.data
     historyData.value = response
     historyData.value.sort((a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -117,19 +120,19 @@ async function fetchHistory() {
 
 async function fetchStats() {
   try {
-    cpuTemp.value = (await axios.get<{ cpu_temp: number }>('/cpu_temp')).data.cpu_temp
-    fanRpm.value = (await axios.get<{ fan_speed: number }>('/fan_speed')).data.fan_speed
-    uptime.value = (await axios.get<{ uptime: number }>('/uptime')).data.uptime
+    cpuTemp.value = (await axios.get<{ cpu_temp: number }>(apiUrl + '/cpu_temp')).data.cpu_temp
+    fanRpm.value = (await axios.get<{ fan_speed: number }>(apiUrl + '/fan_speed')).data.fan_speed
+    uptime.value = (await axios.get<{ uptime: number }>(apiUrl + '/uptime')).data.uptime
 
-    const memStats = (await axios.get<{ mem_used: number; mem_total: number }>('/mem_usage')).data
+    const memStats = ((await axios.get<{ mem_used: number; mem_total: number }>(apiUrl + '/mem_usage'))).data
     memUsed.value = memStats.mem_used / 1024 / 1024
     memTotal.value = memStats.mem_total / 1024 / 1024
 
-    const diskStats = (await axios.get<{ used: number; total: number }>('/disk_usage')).data
+    const diskStats = (await axios.get<{ used: number; total: number }>(apiUrl + '/disk_usage')).data
     diskUsed.value = parseFloat((diskStats.used / 1024 / 1024).toFixed(2))
     diskTotal.value = parseFloat((diskStats.total / 1024 / 1024).toFixed(2))
 
-    cpuUsage.value = parseFloat(((await axios.get<{ cpu_usage: number }>('/cpu_usage')).data.cpu_usage).toFixed(2))
+    cpuUsage.value = parseFloat(((await axios.get<{ cpu_usage: number }>(apiUrl + '/cpu_usage')).data.cpu_usage).toFixed(2))
   } catch (e) {
     console.error("Failed to fetch stats:", e)
   }
