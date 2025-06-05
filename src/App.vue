@@ -30,11 +30,9 @@
         <UsageBar :used="diskUsed" :total="diskTotal" unit="GB" />
       </StatCard>
 
-
-
     </div>
     <div class="container mx-auto mt-6">
-      <StatCard title="CPU History">
+      <StatCard title="History">
         <HistoryChart :history="historyData" />
       </StatCard>
     </div>
@@ -83,6 +81,35 @@ async function fetchHistory() {
     historyData.value.sort((a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
     )
+    historyData.value.forEach(entry => {
+      entry.timestamp = entry.timestamp + 'Z' // Ensure timestamp is in UTC format
+    })
+    // pad missing entries
+    const now = new Date()
+    const startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000) // 24 hours ago
+    const paddedHistory: HistoryEntry[] = []
+    for (let time = startTime; time <= now; time.setMinutes(time.getMinutes() + 1)) {
+      const entry = historyData.value.find(e => new Date(e.timestamp).getMinutes() === time.getMinutes() &&
+        new Date(e.timestamp).getHours() === time.getHours() &&
+        new Date(e.timestamp).getDate() === time.getDate() &&
+        new Date(e.timestamp).getMonth() === time.getMonth() &&
+        new Date(e.timestamp).getFullYear() === time.getFullYear())
+      if (entry) {
+        paddedHistory.push(entry)
+      } else {
+        paddedHistory.push({
+          timestamp: time.toISOString(),
+          cpu_usage: 0,
+          disk_used: 0,
+          disk_total: 1,
+          mem_used: 0,
+          mem_total: 1
+        })
+      }
+    }
+    historyData.value = paddedHistory
+    historyData.value.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+    historyData.value = historyData.value.slice(-100) // Keep only the last 24 hours of data
   } catch (e) {
     console.error("Failed to fetch history:", e)
   }
