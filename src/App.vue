@@ -46,7 +46,7 @@ import ThermoGauge from './components/ThermoGauge.vue'
 import DialGauge from './components/DialGauge.vue'
 import UsageBar from './components/UsageBar.vue'
 import HistoryChart from "./components/HistoryChart.vue"
-const apiUrl = 'http://speedygo55.duckdns.org:8080'
+const apiUrl = 'http://speedygo55.duckdns.org:80'
 
 axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
 
