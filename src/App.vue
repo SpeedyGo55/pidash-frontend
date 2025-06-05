@@ -79,7 +79,9 @@ const uptimeText = computed(() => {
 
 async function fetchHistory() {
   try {
-    const response = (await axios.get<{ data: HistoryEntry[] }>(apiUrl + '/history')).data.data
+    const response = (await axios.get<{ data: HistoryEntry[] }>(apiUrl + '/history', { headers: {
+      'Access-Control-Allow-Origin': '*',
+      }})).data.data
     historyData.value = response
     historyData.value.sort((a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -120,19 +122,31 @@ async function fetchHistory() {
 
 async function fetchStats() {
   try {
-    cpuTemp.value = (await axios.get<{ cpu_temp: number }>(apiUrl + '/cpu_temp')).data.cpu_temp
-    fanRpm.value = (await axios.get<{ fan_speed: number }>(apiUrl + '/fan_speed')).data.fan_speed
-    uptime.value = (await axios.get<{ uptime: number }>(apiUrl + '/uptime')).data.uptime
+    cpuTemp.value = (await axios.get<{ cpu_temp: number }>(apiUrl + '/cpu_temp', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }})).data.cpu_temp
+    fanRpm.value = (await axios.get<{ fan_speed: number }>(apiUrl + '/fan_speed', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }})).data.fan_speed
+    uptime.value = (await axios.get<{ uptime: number }>(apiUrl + '/uptime', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }})).data.uptime
 
-    const memStats = ((await axios.get<{ mem_used: number; mem_total: number }>(apiUrl + '/mem_usage'))).data
+    const memStats = ((await axios.get<{ mem_used: number; mem_total: number }>(apiUrl + '/mem_usage', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }}))).data
     memUsed.value = memStats.mem_used / 1024 / 1024
     memTotal.value = memStats.mem_total / 1024 / 1024
 
-    const diskStats = (await axios.get<{ used: number; total: number }>(apiUrl + '/disk_usage')).data
+    const diskStats = (await axios.get<{ used: number; total: number }>(apiUrl + '/disk_usage', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }})).data
     diskUsed.value = parseFloat((diskStats.used / 1024 / 1024).toFixed(2))
     diskTotal.value = parseFloat((diskStats.total / 1024 / 1024).toFixed(2))
 
-    cpuUsage.value = parseFloat(((await axios.get<{ cpu_usage: number }>(apiUrl + '/cpu_usage')).data.cpu_usage).toFixed(2))
+    cpuUsage.value = parseFloat(((await axios.get<{ cpu_usage: number }>(apiUrl + '/cpu_usage', { headers: {
+        'Access-Control-Allow-Origin': '*',
+      }})).data.cpu_usage).toFixed(2))
   } catch (e) {
     console.error("Failed to fetch stats:", e)
   }
