@@ -48,7 +48,7 @@ import UsageBar from './components/UsageBar.vue'
 import HistoryChart from "./components/HistoryChart.vue"
 const apiUrl = 'https://speedygo55.duckdns.org:80'
 
-axios.defaults.headers.common['Access-Control-Allow-Origin'] = '*'
+axios.defaults.headers.get['Access-Control-Allow-Origin'] = '*'
 
 interface HistoryEntry {
   timestamp: string
